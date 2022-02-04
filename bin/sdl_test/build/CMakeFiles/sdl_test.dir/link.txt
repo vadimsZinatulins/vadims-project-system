@@ -1,0 +1,1 @@
+/usr/bin/c++     CMakeFiles/sdl_test.dir/src/main.cpp.o  -o ../bin/sdl_test 

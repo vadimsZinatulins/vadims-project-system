@@ -1,0 +1,1 @@
+/usr/bin/c++     CMakeFiles/vps.dir/src/main.cpp.o CMakeFiles/vps.dir/src/Arguments.cpp.o CMakeFiles/vps.dir/src/NewProject.cpp.o CMakeFiles/vps.dir/src/ActionList.cpp.o  -o ../bin/vps 

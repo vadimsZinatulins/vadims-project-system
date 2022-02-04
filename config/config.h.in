@@ -1,0 +1,4 @@
+#pragma once
+
+#define MAJOR_VERSION @vps_VERSION_MAJOR@
+#define MINOR_VERSION @vps_VERSION_MINOR@

@@ -1,0 +1,16 @@
+#IncludeRegexLine: ^[ 	]*[#%][ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+../include/config.h
+
+/home/ctw01897/playground/bin/sdl_test/src/main.cpp
+config.h
+/home/ctw01897/playground/bin/sdl_test/src/config.h
+iostream
+-
+

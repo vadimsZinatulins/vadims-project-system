@@ -1,0 +1,22 @@
+[
+{
+  "directory": "/home/ctw01897/playground/build",
+  "command": "/usr/bin/c++   -I/home/ctw01897/playground/include    -std=gnu++17 -o CMakeFiles/vps.dir/src/main.cpp.o -c /home/ctw01897/playground/src/main.cpp",
+  "file": "/home/ctw01897/playground/src/main.cpp"
+},
+{
+  "directory": "/home/ctw01897/playground/build",
+  "command": "/usr/bin/c++   -I/home/ctw01897/playground/include    -std=gnu++17 -o CMakeFiles/vps.dir/src/Arguments.cpp.o -c /home/ctw01897/playground/src/Arguments.cpp",
+  "file": "/home/ctw01897/playground/src/Arguments.cpp"
+},
+{
+  "directory": "/home/ctw01897/playground/build",
+  "command": "/usr/bin/c++   -I/home/ctw01897/playground/include    -std=gnu++17 -o CMakeFiles/vps.dir/src/NewProject.cpp.o -c /home/ctw01897/playground/src/NewProject.cpp",
+  "file": "/home/ctw01897/playground/src/NewProject.cpp"
+},
+{
+  "directory": "/home/ctw01897/playground/build",
+  "command": "/usr/bin/c++   -I/home/ctw01897/playground/include    -std=gnu++17 -o CMakeFiles/vps.dir/src/ActionList.cpp.o -c /home/ctw01897/playground/src/ActionList.cpp",
+  "file": "/home/ctw01897/playground/src/ActionList.cpp"
+}
+]

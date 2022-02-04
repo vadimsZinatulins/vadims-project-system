@@ -1,0 +1,22 @@
+#IncludeRegexLine: ^[ 	]*[#%][ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+../include/NewProject.h
+string
+-
+
+/home/ctw01897/playground/src/NewProject.cpp
+NewProject.h
+/home/ctw01897/playground/src/NewProject.h
+iostream
+-
+filesystem
+-
+fstream
+-
+
