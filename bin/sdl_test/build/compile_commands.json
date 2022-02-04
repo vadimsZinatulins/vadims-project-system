@@ -1,7 +1,0 @@
-[
-{
-  "directory": "/home/ctw01897/playground/bin/sdl_test/build",
-  "command": "/usr/bin/c++   -I/home/ctw01897/playground/bin/sdl_test/include    -std=gnu++17 -o CMakeFiles/sdl_test.dir/src/main.cpp.o -c /home/ctw01897/playground/bin/sdl_test/src/main.cpp",
-  "file": "/home/ctw01897/playground/bin/sdl_test/src/main.cpp"
-}
-]

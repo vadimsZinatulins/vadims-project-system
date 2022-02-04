@@ -1,3 +1,0 @@
-/home/ctw01897/playground/bin/sdl_test/build/CMakeFiles/rebuild_cache.dir
-/home/ctw01897/playground/bin/sdl_test/build/CMakeFiles/edit_cache.dir
-/home/ctw01897/playground/bin/sdl_test/build/CMakeFiles/sdl_test.dir
