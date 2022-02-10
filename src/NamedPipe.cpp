@@ -1,5 +1,7 @@
 #include "NamedPipe.h"
+#include "Daemon.h"
 
+#include <functional>
 #include <iostream>
 #include <string.h>
 #include <stdlib.h>
@@ -10,7 +12,7 @@
 #include <sys/types.h>
 #include "sys/stat.h"
 
-void createAndRead()
+void createAndRead(std::function<void(int, char *[])> &func)
 {
 	// Create named pipe
 	if(mkfifo("/tmp/vps.pipe", 0622) != 0)
@@ -33,7 +35,8 @@ void createAndRead()
 	// Argument list
 	char **argv = (char **)malloc(PIPE_BUF * sizeof(char *));
 
-	while(true)
+	// While daemon is running
+	while(Daemon::getInstance().isRunning())
 	{
 		// Clear pipe buffer
 		memset(cmdPipe, 0, PIPE_BUF);
@@ -54,8 +57,14 @@ void createAndRead()
 			arg = strtok(nullptr, " \t\n");
 		}
 
-		if(argc > 0) std::cout << "Got Arguments" << std::endl;
+		if(argc > 0) func(argc, argv);
 	}
+
+	// Close named pipe
+	close(namedPipe);
+
+	// Delete the named pipe
+	remove("/tmp/vps.pipe");
 }
 
 void write()

@@ -1,4 +1,6 @@
 #pragma once
 
-void createAndRead();
+#include <functional>
+
+void createAndRead(std::function<void(int, char *[])> &func);
 void write();
