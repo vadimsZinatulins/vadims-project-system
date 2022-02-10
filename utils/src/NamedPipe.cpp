@@ -13,7 +13,7 @@
 #include <sys/types.h>
 #include "sys/stat.h"
 
-void createAndRead(std::function<void(int, char *[])> &func)
+void createAndRead(std::function<void(int, char *[])> func)
 {
 	// Create named pipe
 	if(mkfifo("/tmp/vps.pipe", 0622) != 0)
@@ -71,15 +71,20 @@ void createAndRead(std::function<void(int, char *[])> &func)
 void write(Arguments args)
 {
 	// Open named pipe
-	int pipeFile = open("/tmp/vps.pipe", O_RDONLY);
+	int pipeFile = open("/tmp/vps.pipe", O_WRONLY);
+
 	// Check if it was successfully opened
 	if(pipeFile < 0)
+	{
+		std::cout << "Failed to open named pipe" << std::endl;
 		return;
+	}
 
 	// Write arguments to the named pipe
 	while(args.hasMore())
 	{
 		auto arg = args.next() + "\n";
+		std::cout << "Writing: " << arg << std::endl;
 		write(pipeFile, arg.c_str(), arg.size() + 1);
 	}
 

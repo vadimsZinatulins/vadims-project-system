@@ -4,5 +4,5 @@
 
 #include <functional>
 
-void createAndRead(std::function<void(int, char *[])> &func);
+void createAndRead(std::function<void(int, char *[])> func);
 void write(Arguments args);

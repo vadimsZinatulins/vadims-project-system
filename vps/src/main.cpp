@@ -1,7 +1,9 @@
-#include <iostream>
+#include "Arguments.h"
+#include "NamedPipe.h"
 
 int main(int argc, char *argv[])
 {
-	std::cout << "Hello World!" << std::endl;
+	write(Arguments(argc, argv));
+
 	return 0;
 }

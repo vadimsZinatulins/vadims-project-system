@@ -7,6 +7,7 @@ class Arguments final
 {
 public:
 	Arguments(int argc, char *argv[]);
+	Arguments(std::vector<std::string> args);
 	~Arguments();
 
 	bool hasMore() const;
