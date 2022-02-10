@@ -12,4 +12,4 @@ add_subdirectory(vps)
 add_subdirectory(vpsctl)
 add_subdirectory(utils)
 
-# install(TARGETS ${PROJECT_NAME} DESTINATION /usr/local/bin)
+install(TARGETS vps vpsctl DESTINATION /usr/local/bin)
