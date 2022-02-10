@@ -1,6 +1,7 @@
 #include "NamedPipe.h"
 #include "Daemon.h"
 
+#include <fcntl.h>
 #include <functional>
 #include <iostream>
 #include <string.h>
@@ -67,8 +68,22 @@ void createAndRead(std::function<void(int, char *[])> &func)
 	remove("/tmp/vps.pipe");
 }
 
-void write()
+void write(Arguments args)
 {
+	// Open named pipe
+	int pipeFile = open("/tmp/vps.pipe", O_RDONLY);
+	// Check if it was successfully opened
+	if(pipeFile < 0)
+		return;
 
+	// Write arguments to the named pipe
+	while(args.hasMore())
+	{
+		auto arg = args.next() + "\n";
+		write(pipeFile, arg.c_str(), arg.size() + 1);
+	}
+
+	// Close named pipe
+	close(pipeFile);
 }
 
