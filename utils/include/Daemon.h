@@ -8,6 +8,8 @@ public:
 	bool isRunning() const;
 
 	void daemonize();
+	void shutdown();
+
 	void stop();
 private:
 	Daemon() = default;

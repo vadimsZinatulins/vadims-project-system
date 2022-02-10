@@ -84,7 +84,6 @@ void write(Arguments args)
 	while(args.hasMore())
 	{
 		auto arg = args.next() + "\n";
-		std::cout << "Writing: " << arg << std::endl;
 		write(pipeFile, arg.c_str(), arg.size() + 1);
 	}
 

@@ -4,11 +4,11 @@
 #include "NamedPipe.h"
 
 #include <signal.h>
-#include <iostream>
+#include <stdlib.h>
 
 void daemonTerminate(int sig)
 {
-	Daemon::getInstance().stop();
+	exit(1);
 }
 
 void initSignals()
@@ -33,10 +33,17 @@ int main(int argc, char *argv[])
 
 	actions.add({ "--stop" }, []{ Daemon::getInstance().stop(); });
 
-	createAndRead([](int argc, char *argv[]){
+	createAndRead([&](int argc, char *argv[]){
 		Arguments args(argc, argv);
-		while(args.hasMore()) std::cout << args.next() << std::endl;
+		while(args.hasMore()) 
+		{
+			auto nextArg = args.next();
+			if(actions.contains(nextArg))
+				actions[nextArg]();
+		}
 	});
+
+	Daemon::getInstance().shutdown();
 
 	return 0;
 }
