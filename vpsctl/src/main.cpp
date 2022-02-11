@@ -5,6 +5,8 @@
 
 #include <signal.h>
 #include <stdlib.h>
+#include <iostream>
+#include <filesystem>
 
 void daemonTerminate(int sig)
 {
@@ -29,18 +31,29 @@ int main(int argc, char *argv[])
 
 	initSignals();
 
-	ArgProc actions;
-
-	actions.add({ "--stop" }, []{ Daemon::getInstance().stop(); });
-
 	createAndRead([&](int argc, char *argv[]){
 		Arguments args(argc, argv);
+		ArgProc actions;
+
+		actions.add({ "--stop" }, []{ Daemon::getInstance().stop(); });
+		actions.add({ "--change-dir" }, [&]{ std::filesystem::current_path(args.next()); });
+		actions.add({ "--new-workspace", "--nw" }, []{});
+		actions.add({ "--new-app", "--na" }, []{});
+		actions.add({ "--new-lib", "--nl" }, []{});
+		actions.add({ "--add-header", "--ah" }, []{});
+		actions.add({ "--add-cpp", "--ac" }, []{});
+		actions.add({ "--add-header-cpp", "--ahc" }, []{});
+
 		while(args.hasMore()) 
 		{
 			auto nextArg = args.next();
 			if(actions.contains(nextArg))
+			{
 				actions[nextArg]();
+			}
 		}
+		
+		std::filesystem::current_path("/");
 	});
 
 	Daemon::getInstance().shutdown();

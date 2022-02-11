@@ -80,10 +80,13 @@ void write(Arguments args)
 		return;
 	}
 
+	std::cout << "Sending following Arguments:" << std::endl;
 	// Write arguments to the named pipe
 	while(args.hasMore())
 	{
 		auto arg = args.next() + "\n";
+		std::cout << "\t" << arg;
+
 		write(pipeFile, arg.c_str(), arg.size() + 1);
 	}
 
