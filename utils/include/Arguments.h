@@ -12,6 +12,8 @@ public:
 
 	bool hasMore() const;
 	std::string next();
+
+	void print() const;
 private:
 	std::vector<std::string> m_arguments;
 	std::size_t m_index;

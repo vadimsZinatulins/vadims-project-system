@@ -2,6 +2,7 @@
 #include "ArgProc.h"
 #include "Daemon.h"
 #include "NamedPipe.h"
+#include "Workspace.h"
 
 #include <signal.h>
 #include <stdlib.h>
@@ -10,6 +11,9 @@
 
 void daemonTerminate(int sig)
 {
+	cleanup();
+	Daemon::getInstance().shutdown();
+
 	exit(1);
 }
 
@@ -31,11 +35,12 @@ int main(int argc, char *argv[])
 
 	initSignals();
 
-	createAndRead([&](int argc, char *argv[]){
-		Arguments args(argc, argv);
+	createAndRead([&](int argCount, char *argValue[]){
+		Arguments args(argCount, argValue);
 		ArgProc actions;
 
 		actions.add({ "--stop" }, []{ Daemon::getInstance().stop(); });
+		actions.add({ "--init" }, [&]{ Workspace::create(args.next()); });
 		actions.add({ "--change-dir" }, [&]{ std::filesystem::current_path(args.next()); });
 		actions.add({ "--new-workspace", "--nw" }, []{});
 		actions.add({ "--new-app", "--na" }, []{});

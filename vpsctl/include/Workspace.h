@@ -12,6 +12,9 @@ public:
 
 	static Workspace create(std::string name);
 private:
+	void createFile() const;
+
+
 	std::string m_name;
 
 	int m_majorVersion;

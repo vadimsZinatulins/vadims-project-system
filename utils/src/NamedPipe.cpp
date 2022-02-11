@@ -4,6 +4,7 @@
 #include <fcntl.h>
 #include <functional>
 #include <iostream>
+#include <sstream>
 #include <string.h>
 #include <stdlib.h>
 #include <limits.h>
@@ -58,12 +59,17 @@ void createAndRead(std::function<void(int, char *[])> func)
 			arg = strtok(nullptr, " \t\n");
 		}
 
-		if(argc > 0) func(argc, argv);
+		if(argc > 1) func(argc, argv);
 	}
 
 	// Close named pipe
 	close(namedPipe);
 
+	cleanup();
+}
+
+void cleanup()
+{
 	// Delete the named pipe
 	remove("/tmp/vps.pipe");
 }
@@ -80,15 +86,11 @@ void write(Arguments args)
 		return;
 	}
 
-	std::cout << "Sending following Arguments:" << std::endl;
-	// Write arguments to the named pipe
-	while(args.hasMore())
-	{
-		auto arg = args.next() + "\n";
-		std::cout << "\t" << arg;
+	std::stringstream ss;
+	while(args.hasMore()) ss << args.next() + " ";
 
-		write(pipeFile, arg.c_str(), arg.size() + 1);
-	}
+	// Write arguments to the named pipe
+	write(pipeFile, ss.str().c_str(), ss.str().size() + 1);
 
 	// Close named pipe
 	close(pipeFile);
