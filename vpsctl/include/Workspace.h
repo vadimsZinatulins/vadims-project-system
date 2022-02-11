@@ -1,5 +1,7 @@
 #pragma once
 
+#include "WSManager.h"
+
 #include <string>
 #include <vector>
 
@@ -10,7 +12,7 @@ public:
 	Workspace(std::string name);
 	~Workspace();
 
-	static Workspace create(std::string name);
+	static void create(std::string name, WSManager &wsManager);
 private:
 	void createFile() const;
 

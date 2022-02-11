@@ -3,19 +3,25 @@
 #include <iostream>
 #include <fstream>
 #include <filesystem>
+#include <memory>
+#include <streambuf>
 
-Workspace Workspace::create(std::string name)
+void Workspace::create(std::string name, WSManager &wsManager)
 {
-	std::cout << "Creating Workspace called " << name << std::endl;
+	// If the current path already exists in the wsManager or the .vps exists
+	// then the workspace was already initialized
+	if(wsManager.find(std::filesystem::current_path()) != wsManager.end() || std::filesystem::exists(".vps"))
+		return;
 
-	Workspace ws;
-	ws.m_name = name;
-	ws.m_majorVersion = 1;
-	ws.m_minorVersion = 0;
+	auto ws = std::make_shared<Workspace>();
 
-	ws.createFile();
+	ws->m_name = name;
+	ws->m_majorVersion = 1;
+	ws->m_minorVersion = 0;
 
-	return ws;
+	ws->createFile();
+
+	wsManager[std::filesystem::current_path()] = ws;
 }
 
 Workspace::Workspace() {}
@@ -24,8 +30,6 @@ Workspace::~Workspace() {}
 
 void Workspace::createFile() const
 {
-	std::cout << "Create .vps file" << std::endl;
-	
 	std::ofstream configFile(".vps");
 	configFile << m_name.size();
 	configFile << m_name;
