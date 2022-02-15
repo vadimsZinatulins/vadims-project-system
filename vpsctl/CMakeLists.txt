@@ -2,7 +2,7 @@ project(vpsctl VERSION 0.1)
 
 configure_file(${PROJECT_SOURCE_DIR}/config/config.h.in ${PROJECT_SOURCE_DIR}/include/config.h)
 
-add_executable(${PROJECT_NAME} src/main.cpp src/Workspace.cpp)
+add_executable(${PROJECT_NAME} src/main.cpp src/Workspace.cpp src/Version.cpp)
 target_include_directories(${PROJECT_NAME} PUBLIC ${PROJECT_SOURCE_DIR}/include)
 
 target_link_libraries(${PROJECT_NAME} utils)
