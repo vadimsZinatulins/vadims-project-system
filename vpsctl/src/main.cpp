@@ -3,6 +3,7 @@
 #include "Daemon.h"
 #include "NamedPipe.h"
 #include "Workspace.h"
+#include "WSManager.h"
 
 #include <signal.h>
 #include <stdlib.h>
@@ -35,12 +36,14 @@ int main(int argc, char *argv[])
 
 	initSignals();
 
+	WSManager wsManager;
+
 	createAndRead([&](int argCount, char *argValue[]){
 		Arguments args(argCount, argValue);
 		ArgProc actions;
 
 		actions.add({ "--stop" }, []{ Daemon::getInstance().stop(); });
-		actions.add({ "--init" }, [&]{ Workspace::create(args.next()); });
+		actions.add({ "--init" }, [&]{ Workspace::create(args.next(), wsManager); });
 		actions.add({ "--change-dir" }, [&]{ std::filesystem::current_path(args.next()); });
 		actions.add({ "--new-workspace", "--nw" }, []{});
 		actions.add({ "--new-app", "--na" }, []{});

@@ -30,9 +30,17 @@ Workspace::~Workspace() {}
 
 void Workspace::createFile() const
 {
-	std::ofstream configFile(".vps");
-	configFile << m_name.size();
-	configFile << m_name;
+	std::ofstream configFile(".vps", std::ios::binary);
 	configFile.close();
+}
+
+Workspace::Buffer Workspace::serialize()
+{
+	return Buffer();
+}
+
+void Workspace::deserialize(Workspace::Buffer buffer)
+{
+
 }
 
