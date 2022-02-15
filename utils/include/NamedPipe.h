@@ -3,8 +3,32 @@
 #include "Arguments.h"
 
 #include <functional>
+#include <string>
 
-void createAndRead(std::function<void(int, char *[])> func);
-void cleanup();
+enum class PipeType { Input, Output };
+enum class PipeAccess { Read, Write };
 
-void write(Arguments args);
+class NamedPipe final 
+{
+public:
+	static NamedPipe &getInstance();
+
+	void openPipe(PipeType pipe, PipeAccess acces, bool createPipe = false);
+	void close(bool deletePipe = false);
+
+	void writeToPipe(Arguments args);
+	Arguments readFromPipe();
+
+	void listenPipe(std::function<void(Arguments)> onReceive);
+private:
+	NamedPipe() = default;
+	~NamedPipe() = default;
+
+	static NamedPipe m_instance;
+
+	int m_namedPipe { 0 };
+
+	std::string m_pipePath { "" };
+	int m_pipeAccess { 0 };
+};
+

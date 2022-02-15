@@ -55,6 +55,7 @@ void Daemon::daemonize()
 	// std::cout << "Pid file created" << std::endl;
 
 	m_isRunning = true;
+
 }
 
 void Daemon::shutdown() { remove("/tmp/vps.pid"); }

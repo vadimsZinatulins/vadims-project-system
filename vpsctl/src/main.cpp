@@ -55,6 +55,7 @@ void startDaemon()
 		actions.add({ "--stop" }, []{ Daemon::getInstance().stop(); });
 		actions.add({ "--change-dir" }, [&]{ std::filesystem::current_path(args.next()); });
 		actions.add({ "--new-workspace", "-nw" }, [&]{ Workspace::create(args.next(), wsManager); });
+		actions.add({ "--help", "-h" }, [&]{ std::cout << "Help" << std::endl; });
 
 		while(args.hasMore()) 
 		{

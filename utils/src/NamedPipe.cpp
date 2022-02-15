@@ -1,6 +1,7 @@
 #include "NamedPipe.h"
 #include "Daemon.h"
 
+#include <filesystem>
 #include <fcntl.h>
 #include <functional>
 #include <iostream>
@@ -14,85 +15,93 @@
 #include <sys/types.h>
 #include "sys/stat.h"
 
-void createAndRead(std::function<void(int, char *[])> func)
+NamedPipe NamedPipe::m_instance;
+
+NamedPipe &NamedPipe::getInstance() { return m_instance; } 
+
+void NamedPipe::openPipe(PipeType pipe, PipeAccess access, bool createPipe)
 {
-	// Create named pipe
-	if(mkfifo("/tmp/vps.pipe", 0622) != 0)
+	// Determine which pipe to open
+	m_pipePath = "/tmp/vps" + std::string(pipe == PipeType::Input ? "in.pipe" : "out.pipe");
+	// Determine the mode
+	m_pipeAccess = access == PipeAccess::Read ? O_RDONLY : O_WRONLY;
+
+	// Create pipe if necessary
+	if(createPipe && !std::filesystem::exists(m_pipePath) && mkfifo(m_pipePath.c_str(), 0622))
 	{
-		std::cout << "Failed to create named pipe" << std::endl;
+		std::cout << "Failed to create named pipe at: " << m_pipePath << std::endl;
 		return;
 	}
 
-	// Open named pipe
-	int namedPipe = open("/tmp/vps.pipe", O_RDWR);
-	if(namedPipe < 0)
-	{
-		std::cout << "Failed to open named pipe" << std::endl;
-		return;
-	}
+	// Open the pipe
+	m_namedPipe = open(m_pipePath.c_str(), m_pipeAccess);
 
-	// Pipe arguments
-	char *cmdPipe = (char *)malloc(PIPE_BUF);
-
-	// Argument list
-	char **argv = (char **)malloc(PIPE_BUF * sizeof(char *));
-
-	// While daemon is running
-	while(Daemon::getInstance().isRunning())
-	{
-		// Clear pipe buffer
-		memset(cmdPipe, 0, PIPE_BUF);
-
-		// Read from named pipe. If nothing is to read wait
-		// until data comes up
-		if(read(namedPipe, cmdPipe, PIPE_BUF) < 0)
-			return;
-
-		// Tokenize pipe arguments
-		char *arg = strtok(cmdPipe, " \t\n");
-		int argc = 1;
-
-		// Store arguments in argv list
-		while(arg != nullptr && argc < PIPE_BUF)
-		{
-			argv[argc++] = arg;
-			arg = strtok(nullptr, " \t\n");
-		}
-
-		if(argc > 1) func(argc, argv);
-	}
-
-	// Close named pipe
-	close(namedPipe);
-
-	cleanup();
+	if(m_namedPipe < 0)
+		std::cout << "Failed to open the pipe at: " << m_pipePath << std::endl;
 }
 
-void cleanup()
+void NamedPipe::close(bool deletePipe)
 {
-	// Delete the named pipe
-	remove("/tmp/vps.pipe");
+	// Close the pipe
+	close(m_namedPipe);
+
+	// Delete the pipe if necessry
+	if(deletePipe)
+		remove(m_pipePath.c_str());
 }
 
-void write(Arguments args)
+void NamedPipe::writeToPipe(Arguments args)
 {
-	// Open named pipe
-	int pipeFile = open("/tmp/vps.pipe", O_WRONLY);
-
-	// Check if it was successfully opened
-	if(pipeFile < 0)
-	{
-		std::cout << "Failed to open named pipe" << std::endl;
-		return;
-	}
-
+	// Create the content to be writen to the pipe
 	std::stringstream ss;
 	while(args.hasMore()) ss << args.next() + " ";
 
-	// Write arguments to the named pipe
-	write(pipeFile, ss.str().c_str(), ss.str().size() + 1);
+	// Write arguments to the pipe
+	write(m_namedPipe, ss.str().c_str(), ss.str().size() + 1);
+}
 
-	// Close named pipe
-	close(pipeFile);
+Arguments NamedPipe::readFromPipe()
+{
+	// Pipe arguments
+	char *cmdPipe = new char[PIPE_BUF];
+
+	// Argument list
+	char **argv = new char*[PIPE_BUF * sizeof(char*)];
+
+	// Clear pipe buffer
+	memset(cmdPipe, 0, PIPE_BUF);
+
+	// Read from named pipe. If nothing is to read wait
+	// until data comes up
+	if(read(m_namedPipe, cmdPipe, PIPE_BUF) < 0)
+	{
+		delete[] cmdPipe;
+		delete[] argv;
+		return Arguments({});
+	}
+
+	// Tokenize pipe arguments
+	char *arg = strtok(cmdPipe, " \t\n");
+	int argc = 1;
+
+	// Store arguments in argv list
+	while(arg != nullptr && argc < PIPE_BUF)
+	{
+		argv[argc++] = arg;
+		arg = strtok(nullptr, " \t\n");
+	}
+
+	Arguments args(argc, argv);
+
+	delete[] cmdPipe;
+	delete[] argv;
+
+	return args;
+}
+
+void NamedPipe::listenPipe(std::function<void(Arguments)> onReceive)
+{
+	while(Daemon::getInstance().isRunning())
+		onReceive(readFromPipe());
 }
 
