@@ -13,22 +13,27 @@ public:
 	~Workspace();
 
 	static void create(std::string name, WSManager &wsManager);
+
+	void setMajorVersion(unsigned int version);
+	void setMinorVersion(unsigned int version);
+
+	unsigned int getMajorVerion() const;
+	unsigned int getMinorVersion() const;
 private:
 	struct Buffer
 	{
-		void *data;
+		char *data;
 		std::size_t size;
 	};
 
 	void createFile() const;
 
-	Buffer serialize();
+	Buffer serialize() const;
 	void deserialize(Buffer buffer);
 
 	std::string m_name;
 
-	int m_majorVersion;
-	int m_minorVersion;
+	char m_version;
 
 	std::vector<std::string> m_headerFiles;
 	std::vector<std::string> m_cppFiles;
