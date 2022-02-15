@@ -53,6 +53,8 @@ void startDaemon()
 		ArgProc actions;
 
 		actions.add({ "--stop" }, []{ Daemon::getInstance().stop(); });
+		actions.add({ "--change-dir" }, [&]{ std::filesystem::current_path(args.next()); });
+		actions.add({ "--new-workspace", "-nw" }, [&]{ Workspace::create(args.next(), wsManager); });
 
 		while(args.hasMore()) 
 		{

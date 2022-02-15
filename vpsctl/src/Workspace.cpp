@@ -1,5 +1,6 @@
 #include "Workspace.h"
 
+#include <ios>
 #include <iostream>
 #include <fstream>
 #include <filesystem>
@@ -9,10 +10,8 @@
 
 void Workspace::create(std::string name, WSManager &wsManager)
 {
-	// If the current path already exists in the wsManager or the .vps exists
-	// then the workspace was already initialized
-	if(wsManager.find(std::filesystem::current_path()) != wsManager.end() || std::filesystem::exists(".vps"))
-		return;
+	std::filesystem::create_directory(name);
+	std::filesystem::current_path(std::filesystem::current_path().string() + "/" + name);
 
 	auto ws = std::make_shared<Workspace>();
 
@@ -20,7 +19,8 @@ void Workspace::create(std::string name, WSManager &wsManager)
 	ws->setMajorVersion(1);
 	ws->setMinorVersion(0);
 
-	ws->createFile();
+	ws->updateCmakeFile();
+	// ws->createFile();
 
 	wsManager[std::filesystem::current_path()] = ws;
 }
@@ -47,6 +47,16 @@ unsigned int Workspace::getMajorVerion() const
 unsigned int Workspace::getMinorVersion() const 
 {
 	return m_version & 0x0f;
+}
+
+void Workspace::updateCmakeFile() const
+{
+	std::ofstream cmakeFile("CMakeLists.txt", std::ios::trunc);
+
+	cmakeFile << "cmake_minimum_required(VERSION 3.10)\n\n";
+	cmakeFile << "project(" << m_name << ")\n\n";
+
+	cmakeFile.close();
 }
 
 void Workspace::createFile() const

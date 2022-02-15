@@ -26,6 +26,7 @@ private:
 		std::size_t size;
 	};
 
+	void updateCmakeFile() const;
 	void createFile() const;
 
 	Buffer serialize() const;
