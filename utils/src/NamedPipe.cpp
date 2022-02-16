@@ -15,16 +15,12 @@
 #include <sys/types.h>
 #include "sys/stat.h"
 
-NamedPipe NamedPipe::m_instance;
-
-NamedPipe &NamedPipe::getInstance() { return m_instance; } 
-
-void NamedPipe::openPipe(PipeType pipe, PipeAccess access, bool createPipe)
+void NamedPipe::openPipe(PipeType pipe, bool createPipe)
 {
+	std::string paths[2] = { "in.pipe", "out.pipe" };
+
 	// Determine which pipe to open
-	m_pipePath = "/tmp/vps" + std::string(pipe == PipeType::Input ? "in.pipe" : "out.pipe");
-	// Determine the mode
-	m_pipeAccess = access == PipeAccess::Read ? O_RDONLY : O_WRONLY;
+	m_pipePath = "/tmp/vps" + paths[static_cast<int>(pipe)];
 
 	// Create pipe if necessary
 	if(createPipe && !std::filesystem::exists(m_pipePath) && mkfifo(m_pipePath.c_str(), 0622))
@@ -34,8 +30,7 @@ void NamedPipe::openPipe(PipeType pipe, PipeAccess access, bool createPipe)
 	}
 
 	// Open the pipe
-	m_namedPipe = open(m_pipePath.c_str(), m_pipeAccess);
-
+	m_namedPipe = open(m_pipePath.c_str(), O_RDWR);
 	if(m_namedPipe < 0)
 		std::cout << "Failed to open the pipe at: " << m_pipePath << std::endl;
 }
@@ -43,7 +38,7 @@ void NamedPipe::openPipe(PipeType pipe, PipeAccess access, bool createPipe)
 void NamedPipe::close(bool deletePipe)
 {
 	// Close the pipe
-	close(m_namedPipe);
+	::close(m_namedPipe);
 
 	// Delete the pipe if necessry
 	if(deletePipe)

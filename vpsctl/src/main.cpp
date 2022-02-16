@@ -12,9 +12,6 @@
 
 void daemonTerminate(int sig)
 {
-	std::cout << "Terminating" << std::endl;
-
-	cleanup();
 	Daemon::getInstance().shutdown();
 
 	exit(1);
@@ -48,14 +45,13 @@ void startDaemon()
 	WSManager wsManager;
 
 	// This is invoked whenever daemon receives an command
-	createAndRead([&](int argCount, char *argValue[]){
-		Arguments args(argCount, argValue);
+	Daemon::getInstance().m_inputPipe.listenPipe([&](Arguments args) {
 		ArgProc actions;
 
 		actions.add({ "--stop" }, []{ Daemon::getInstance().stop(); });
 		actions.add({ "--change-dir" }, [&]{ std::filesystem::current_path(args.next()); });
 		actions.add({ "--new-workspace", "-nw" }, [&]{ Workspace::create(args.next(), wsManager); });
-		actions.add({ "--help", "-h" }, [&]{ std::cout << "Help" << std::endl; });
+		actions.add({ "--help", "-h" }, []{ Daemon::getInstance().m_outputPipe.writeToPipe(Arguments({ "Help" })); });
 
 		while(args.hasMore()) 
 		{
@@ -65,6 +61,7 @@ void startDaemon()
 		}
 		
 		std::filesystem::current_path("/");
+			
 	});
 
 	Daemon::getInstance().shutdown();
@@ -72,7 +69,10 @@ void startDaemon()
 
 void stopDaemon()
 {
-	write(Arguments({ "--stop" }));
+	NamedPipe inputPipe;
+	inputPipe.openPipe(PipeType::Input);
+	inputPipe.writeToPipe(Arguments({ "--stop" }));
+	inputPipe.close();
 }
 
 void restartDaemon()

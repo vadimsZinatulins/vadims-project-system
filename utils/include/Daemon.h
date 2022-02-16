@@ -1,5 +1,7 @@
 #pragma once
 
+#include "NamedPipe.h"
+
 class Daemon final
 {
 public:
@@ -11,6 +13,9 @@ public:
 	void shutdown();
 
 	void stop();
+
+	NamedPipe m_inputPipe;
+	NamedPipe m_outputPipe;
 private:
 	Daemon() = default;
 	~Daemon() = default;

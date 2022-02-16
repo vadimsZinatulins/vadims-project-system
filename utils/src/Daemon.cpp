@@ -1,4 +1,5 @@
 #include "Daemon.h"
+#include "PidFile.h"
 
 #include <stdio.h>
 #include <fstream>
@@ -8,56 +9,51 @@
 
 void createProcess()
 {
+	// Fork the process
 	switch(fork())
 	{
-	case -1: exit(1);
-	case 0: break;
-	default: exit(0);
-	}
-}
-
-void createPidFile()
-{
-	std::ofstream pidFile("/tmp/vps.pid");
-	if(pidFile.fail())
-	{
-		// std::cout << "Failed to open pid file" << std::endl;
-		exit(1);
+	case -1: exit(1);	// Exit on error
+	case 0: break;		// Continue on child process
+	default: exit(0);	// Exit the parent process
 	}
 
-	pidFile << (long)getpid() << "\n";
-
-	pidFile.close();
+	// Create session ID
+	if(setsid() < 0)
+		exit(1);		// Exit on error
 }
 
 Daemon Daemon::m_instance;
 
 Daemon &Daemon::getInstance() { return m_instance; }
 
-bool Daemon::isRunning() const { /* std::cout << "Checking if still running" << std::endl; */ return m_isRunning; }
+bool Daemon::isRunning() const { return m_isRunning; }
 
 void Daemon::daemonize() 
 {
-	// std::cout << "Creating process" << std::endl;
 	createProcess();
-	// std::cout << "Process created" << std::endl;
 
-	// std::cout << "Creating session" << std::endl;
-	if(setsid() < 0)
-	{
-		// std::cout << "Failed to create session" << std::endl;
-		exit(1);
-	}
-	// std::cout << "Session created" << std::endl;
-
-	// std::cout << "Creating pid file" << std::endl;
-	createPidFile();
-	// std::cout << "Pid file created" << std::endl;
+	// Create .pid file
+	PidFile::open();
 
 	m_isRunning = true;
 
+	// Create input pipe file
+	m_inputPipe.openPipe(PipeType::Input, true);
+
+	// Create output pipe file
+	m_outputPipe.openPipe(PipeType::Output, true);
 }
 
-void Daemon::shutdown() { remove("/tmp/vps.pid"); }
+void Daemon::shutdown() 
+{
+	// Delete .pid file
+	PidFile::close();
 
-void Daemon::stop() { /*std::cout << "Stoping Daemon Call" << std::endl; */ m_isRunning = false; }
+	// Delete input pipe file
+	m_inputPipe.close(true);
+
+	// Delete output pipe file
+	m_outputPipe.close(true);
+}
+
+void Daemon::stop() { m_isRunning = false; }
