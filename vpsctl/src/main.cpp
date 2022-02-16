@@ -8,6 +8,7 @@
 #include <filesystem>
 #include <csignal>
 #include <iostream>
+#include <sstream>
 #include <unistd.h>
 
 void daemonTerminate(int sig)
@@ -33,6 +34,15 @@ void initSignals()
 	std::signal(SIGFPE, daemonTerminate);
 }
 
+void listWorkspaces(WSManager &wsManager)
+{
+	std::stringstream out;
+	for(const auto &pair : wsManager)
+		out << pair.second->getName() << " at: " << pair.first << std::endl;
+
+	NamedPipe::write(PipeType::Output, out.str());
+}
+
 void startDaemon()
 {
 	// Daemonize this process
@@ -45,13 +55,15 @@ void startDaemon()
 	WSManager wsManager;
 
 	// This is invoked whenever daemon receives an command
-	Daemon::getInstance().m_inputPipe.listenPipe([&](Arguments args) {
+	Daemon::getInstance().m_inputPipe.listenPipe([&](std::string message) {
+		Arguments args(message);
 		ArgProc actions;
 
 		actions.add({ "--stop" }, []{ Daemon::getInstance().stop(); });
 		actions.add({ "--change-dir" }, [&]{ std::filesystem::current_path(args.next()); });
 		actions.add({ "--new-workspace", "-nw" }, [&]{ Workspace::create(args.next(), wsManager); });
-		actions.add({ "--help", "-h" }, []{ Daemon::getInstance().m_outputPipe.writeToPipe(Arguments({ "Help" })); });
+		actions.add({ "--list-workspaces", "-ls-w" }, [&]{ listWorkspaces(wsManager); });
+		actions.add({ "--help", "-h" }, []{ NamedPipe::write(PipeType::Output, "Help"); });
 
 		while(args.hasMore()) 
 		{
@@ -61,7 +73,6 @@ void startDaemon()
 		}
 		
 		std::filesystem::current_path("/");
-			
 	});
 
 	Daemon::getInstance().shutdown();
@@ -69,10 +80,7 @@ void startDaemon()
 
 void stopDaemon()
 {
-	NamedPipe inputPipe;
-	inputPipe.openPipe(PipeType::Input);
-	inputPipe.writeToPipe(Arguments({ "--stop" }));
-	inputPipe.close();
+	NamedPipe::write(PipeType::Input, "--stop");
 }
 
 void restartDaemon()

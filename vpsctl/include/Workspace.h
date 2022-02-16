@@ -5,12 +5,9 @@
 class Workspace final
 {
 public:
-	Workspace();
-	Workspace(std::string path);
-	~Workspace();
-
 	static void create(std::string name, WSManager &wsManager);
 
+	std::string getName() const;
 private:
 	void updateCmakeFile() const;
 

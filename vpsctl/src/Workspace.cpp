@@ -22,9 +22,7 @@ void Workspace::create(std::string name, WSManager &wsManager)
 	wsManager[std::filesystem::current_path()] = ws;
 }
 
-Workspace::Workspace() {}
-Workspace::Workspace(std::string path) {}
-Workspace::~Workspace() {}
+std::string Workspace::getName() const { return m_name; }
 
 void Workspace::updateCmakeFile() const
 {

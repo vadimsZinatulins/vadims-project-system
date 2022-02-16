@@ -12,6 +12,24 @@
 #include <sys/file.h>
 #include "sys/stat.h"
 
+void NamedPipe::write(PipeType pipeType, std::string message)
+{
+	NamedPipe pipe;
+	pipe.openPipe(pipeType);
+	pipe.writeToPipe(message);
+	pipe.close();
+}
+
+std::string NamedPipe::read(PipeType pipeType)
+{
+	NamedPipe pipe;
+	pipe.openPipe(pipeType);
+	std::string receivedMessage = pipe.readFromPipe();
+	pipe.close();
+
+	return receivedMessage;
+}
+
 void NamedPipe::openPipe(PipeType pipe, bool createPipe)
 {
 	std::string paths[2] = { VPSIN_PIPE_FILE, VPSOUT_PIPE_FILE };
@@ -42,57 +60,37 @@ void NamedPipe::close(bool deletePipe)
 		remove(m_pipePath.c_str());
 }
 
-void NamedPipe::writeToPipe(Arguments args)
+void NamedPipe::writeToPipe(std::string message)
 {
-	// Create the content to be writen to the pipe
-	std::stringstream ss;
-	while(args.hasMore()) ss << args.next() + " ";
-
 	// Write arguments to the pipe
-	write(m_namedPipe, ss.str().c_str(), ss.str().size() + 1);
+	::write(m_namedPipe, message.c_str(), message.size() + 1);
 }
 
-Arguments NamedPipe::readFromPipe()
+std::string NamedPipe::readFromPipe()
 {
 	// Pipe arguments
-	char *cmdPipe = new char[PIPE_BUF];
-
-	// Argument list
-	char **argv = new char*[PIPE_BUF * sizeof(char*)];
+	char *pipeMessage = new char[PIPE_BUF];
 
 	// Clear pipe buffer
-	memset(cmdPipe, 0, PIPE_BUF);
+	memset(pipeMessage, 0, PIPE_BUF);
 
 	// Read from named pipe. If nothing is to read wait
 	// until data comes up
-	if(read(m_namedPipe, cmdPipe, PIPE_BUF) < 0)
+	if(::read(m_namedPipe, pipeMessage, PIPE_BUF) < 0)
 	{
-		delete[] cmdPipe;
-		delete[] argv;
+		delete[] pipeMessage;
 
-		return Arguments({});
+		return "";
 	}
 
-	// Tokenize pipe arguments
-	char *arg = strtok(cmdPipe, " \t\n");
-	int argc = 1;
+	std::string receivedMessage(pipeMessage);
 
-	// Store arguments in argv list
-	while(arg != nullptr && argc < PIPE_BUF)
-	{
-		argv[argc++] = arg;
-		arg = strtok(nullptr, " \t\n");
-	}
+	delete[] pipeMessage;
 
-	Arguments args(argc, argv);
-
-	delete[] cmdPipe;
-	delete[] argv;
-
-	return args;
+	return receivedMessage;
 }
 
-void NamedPipe::listenPipe(std::function<void(Arguments)> onReceive)
+void NamedPipe::listenPipe(std::function<void(std::string)> onReceive)
 {
 	while(Daemon::getInstance().isRunning())
 		onReceive(readFromPipe());

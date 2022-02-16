@@ -10,17 +10,11 @@ int main(int argc, char *argv[])
 	std::vector<std::string> args(argv + 1, argv + argc);
 	args.insert(args.begin(), "--change-dir " + std::filesystem::current_path().string());
 
-	NamedPipe inputPipe;
-	inputPipe.openPipe(PipeType::Input);
-	inputPipe.writeToPipe(args);
-	inputPipe.close();
+	// Send input
+	NamedPipe::write(PipeType::Input, Arguments(args).listArguments());
 
-	NamedPipe outputPipe;
-	outputPipe.openPipe(PipeType::Output);
-	auto outputArgs = outputPipe.readFromPipe();
-	outputPipe.close();
-
-	while(outputArgs.hasMore()) std::cout << outputArgs.next();
+	// Wait output
+	std::cout << NamedPipe::read(PipeType::Output) << std::endl;
 
 	return 0;
 }
