@@ -1,11 +1,12 @@
 #include "PidFile.h"
+#include "config.h"
 
 #include <fstream>
 #include <unistd.h>
 
 void PidFile::open()
 {
-	std::ofstream pidFile("/tmp/vps.pid");
+	std::ofstream pidFile(VPSPID_FILE);
 	if(pidFile.fail())
 	{
 		exit(1);
@@ -18,5 +19,5 @@ void PidFile::open()
 
 void PidFile::close()
 {
-	remove("/tmp/vps.pid");
+	remove(VPSPID_FILE);
 }

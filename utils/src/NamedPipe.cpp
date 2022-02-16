@@ -1,26 +1,23 @@
 #include "NamedPipe.h"
 #include "Daemon.h"
+#include "config.h"
 
 #include <filesystem>
-#include <fcntl.h>
 #include <functional>
 #include <iostream>
-#include <sstream>
 #include <string.h>
-#include <stdlib.h>
 #include <limits.h>
 #include <unistd.h>
 
 #include <sys/file.h>
-#include <sys/types.h>
 #include "sys/stat.h"
 
 void NamedPipe::openPipe(PipeType pipe, bool createPipe)
 {
-	std::string paths[2] = { "in.pipe", "out.pipe" };
+	std::string paths[2] = { VPSIN_PIPE_FILE, VPSOUT_PIPE_FILE };
 
 	// Determine which pipe to open
-	m_pipePath = "/tmp/vps" + paths[static_cast<int>(pipe)];
+	m_pipePath = paths[static_cast<int>(pipe)];
 
 	// Create pipe if necessary
 	if(createPipe && !std::filesystem::exists(m_pipePath) && mkfifo(m_pipePath.c_str(), 0622))
@@ -72,6 +69,7 @@ Arguments NamedPipe::readFromPipe()
 	{
 		delete[] cmdPipe;
 		delete[] argv;
+
 		return Arguments({});
 	}
 
