@@ -43,6 +43,22 @@ void listWorkspaces(WSManager &wsManager)
 	NamedPipe::write(PipeType::Output, out.str());
 }
 
+void removeWorkspace(std::string wsName, WSManager &wsManager)
+{
+	for(const auto &pair : wsManager)
+	{
+		if(pair.second->getName() == wsName)
+		{
+			std::filesystem::remove_all(pair.first);
+			wsManager.erase(pair.first);
+			NamedPipe::write(PipeType::Output, "Workspaces " + wsName + " deleted!");
+			return;
+		}
+	}
+
+	NamedPipe::write(PipeType::Output, "No workspaces named " + wsName + " found!");
+}
+
 void startDaemon()
 {
 	// Daemonize this process
@@ -63,6 +79,7 @@ void startDaemon()
 		actions.add({ "--change-dir" }, [&]{ std::filesystem::current_path(args.next()); });
 		actions.add({ "--new-workspace", "-nw" }, [&]{ Workspace::create(args.next(), wsManager); });
 		actions.add({ "--list-workspaces", "-ls-w" }, [&]{ listWorkspaces(wsManager); });
+		actions.add({ "--remove-workspaces", "-rm-w" }, [&]{ removeWorkspace(args.next(), wsManager); });
 		actions.add({ "--help", "-h" }, []{ NamedPipe::write(PipeType::Output, "Help"); });
 
 		while(args.hasMore()) 

@@ -3,6 +3,7 @@
 #include <fstream>
 #include <filesystem>
 #include <memory>
+#include <iostream>
 
 void Workspace::create(std::string name, WSManager &wsManager)
 {
